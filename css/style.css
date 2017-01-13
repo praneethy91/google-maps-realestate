@@ -45,3 +45,12 @@ h1 {
     text-align: left;
     width: 340px;
 }
+
+#zoom-to-area-text {
+    position: relative;
+    width: 70%;
+}
+
+#zoom-to-area {
+    width: 24%;
+}

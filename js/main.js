@@ -171,6 +171,10 @@ function initMap() {
 
         document.getElementById('show-listings').addEventListener('click', showListings);
         document.getElementById('hide-listings').addEventListener('click', hideListings);
+
+        document.getElementById('zoom-to-area').addEventListener('click', function() {
+          zoomToArea();
+        });
     }
 
     // This function populates the infowindow when the marker is clicked. We'll only allow
@@ -214,10 +218,39 @@ function initMap() {
         var markerImage = new google.maps.MarkerImage(
           'http://chart.googleapis.com/chart?chst=d_map_spin&chld=1.15|0|'+ markerColor +
           '|40|_|%E2%80%A2',
-          new google.maps.Size(21, 34),
-          new google.maps.Point(0, 0),
-          new google.maps.Point(10, 34),
-          new google.maps.Size(21,34));
+        new google.maps.Size(21, 34),
+        new google.maps.Point(0, 0),
+        new google.maps.Point(10, 34),
+        new google.maps.Size(21,34));
         return markerImage;
-      }
+    }
+
+    function zoomToArea() {
+        // Initialize the geocoder.
+        var geocoder = new google.maps.Geocoder();
+        // Get the address or place that the user entered.
+        var address = document.getElementById('zoom-to-area-text').value;
+        // Make sure the address isn't blank.
+        if (address == '') {
+            window.alert('You must enter an area, or address.');
+        }
+        else {
+          // Geocode the address/area entered to get the center. Then, center the map
+          // on it and zoom in
+            geocoder.geocode(
+                { address: address,
+                  componentRestrictions: {locality: 'New York'}
+                },
+                function(results, status) {
+                    if (status == google.maps.GeocoderStatus.OK) {
+                        map.setCenter(results[0].geometry.location);
+                        map.setZoom(15);
+                    }
+                    else {
+                        window.alert('We could not find that location - try entering a more' +
+                        ' specific place.');
+                    }
+            });
+        }
+    }
 }
