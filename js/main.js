@@ -1,6 +1,110 @@
 
 var map;
 var markers = [];
+var styles =
+[
+    {
+        'featureType': 'administrative',
+        'elementType': 'labels.text.stroke',
+        'stylers': [
+            {
+                'color': '#ffffff'
+            },
+            {
+                'weight': 4
+            }
+        ]
+    },
+    {
+        'featureType': 'administrative',
+        'elementType': 'labels.text.fill',
+        'stylers': [
+            {
+                'color': '#e85113'
+            }
+        ]
+    },
+    {
+        'featureType': 'transit.station',
+        'stylers': [
+            {
+                'weight': 6
+            },
+            {
+                'hue': '#e85113'
+            }
+        ]
+    },
+    {
+        "featureType": "landscape.natural",
+        "elementType": "geometry.fill",
+        "stylers": [
+            {
+                "visibility": "on"
+            },
+            {
+                "color": "#e0efef"
+            }
+        ]
+    },
+    {
+        "featureType": "poi",
+        "elementType": "geometry.fill",
+        "stylers": [
+            {
+                "visibility": "on"
+            },
+            {
+                "hue": "#1900ff"
+            },
+            {
+                "color": "#c0e8e8"
+            }
+        ]
+    },
+    {
+        "featureType": "road",
+        "elementType": "geometry",
+        "stylers": [
+            {
+                "lightness": 100
+            },
+            {
+                "visibility": "simplified"
+            }
+        ]
+    },
+    {
+        "featureType": "road",
+        "elementType": "labels",
+        "stylers": [
+            {
+                "visibility": "off"
+            }
+        ]
+    },
+    {
+        "featureType": "transit.line",
+        "elementType": "geometry",
+        "stylers": [
+            {
+                "visibility": "on"
+            },
+            {
+                "lightness": 700
+            }
+        ]
+    },
+    {
+        "featureType": "water",
+        "elementType": "all",
+        "stylers": [
+            {
+                "color": "#7dcdcd"
+            }
+        ]
+    }
+];
 
 function initMap() {
     // Constructor creates a new map and binds it to the div in the page
@@ -10,6 +114,7 @@ function initMap() {
             lng: -73.9980244
         },
         zoom: 13,
+        styles: styles,
         mapTypeControl: false
     });
 
@@ -23,7 +128,13 @@ function initMap() {
     ];
 
     var largeInfowindow = new google.maps.InfoWindow();
-    var bounds = new google.maps.LatLngBounds();
+
+    // Style the markers a bit. This will be our listing marker icon.
+    var defaultIcon = makeMarkerIcon('ffd105');
+
+    // Create a "highlighted location" marker color for when the user
+    // mouses over the marker.
+    var highlightedIcon = makeMarkerIcon('2ddb0f');
 
     // The following group uses the location array to create an array of markers on initialize.
     for (var i = 0; i < locations.length; i++) {
@@ -36,6 +147,7 @@ function initMap() {
         var marker = new google.maps.Marker({
             position: position,
             title: title,
+            icon: defaultIcon,
             animation: google.maps.Animation.DROP,
             id: i
         });
@@ -46,6 +158,15 @@ function initMap() {
         // Create an onclick event to open an infowindow at each marker.
         marker.addListener('click', function() {
             populateInfoWindow(this, largeInfowindow);
+        });
+
+        // Two event listeners - one for mouseover, one for mouseout,
+        // to change the colors back and forth.
+        marker.addListener('mouseover', function() {
+            this.setIcon(highlightedIcon);
+        });
+        marker.addListener('mouseout', function() {
+            this.setIcon(defaultIcon);
         });
 
         document.getElementById('show-listings').addEventListener('click', showListings);
@@ -59,7 +180,7 @@ function initMap() {
         // Check to make sure the infowindow is not already opened on this marker.
         if (infowindow.marker != marker) {
             infowindow.marker = marker;
-            infowindow.setContent('<div>' + marker.title + '</div>');
+            infowindow.setContent('<div>' + marker.position + '</div>');
             infowindow.open(map, marker);
             // Make sure the marker property is cleared if the infowindow is closed.
             infowindow.addListener('closeclick',function(){
@@ -87,4 +208,16 @@ function initMap() {
             markers[i].setMap(null);
         }
     }
+
+    //This makes the custom marker icon image
+    function makeMarkerIcon(markerColor) {
+        var markerImage = new google.maps.MarkerImage(
+          'http://chart.googleapis.com/chart?chst=d_map_spin&chld=1.15|0|'+ markerColor +
+          '|40|_|%E2%80%A2',
+          new google.maps.Size(21, 34),
+          new google.maps.Point(0, 0),
+          new google.maps.Point(10, 34),
+          new google.maps.Size(21,34));
+        return markerImage;
+      }
 }
