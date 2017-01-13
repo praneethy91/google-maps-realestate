@@ -185,11 +185,46 @@ function initMap() {
         if (infowindow.marker != marker) {
             infowindow.marker = marker;
             infowindow.setContent('<div>' + marker.position + '</div>');
-            infowindow.open(map, marker);
+
             // Make sure the marker property is cleared if the infowindow is closed.
             infowindow.addListener('closeclick',function(){
-                infowindow.setMarker(null);
+                infowindow.marker = null;
             });
+
+            var streetViewService = new google.maps.StreetViewService();
+            var radius = 200;
+            // In case the status is OK, which means the pano was found, compute the
+            // position of the streetview image, then calculate the heading, then get a
+            // panorama from that and set the options
+            function getStreetView(data, status) {
+                if (status == google.maps.StreetViewStatus.OK) {
+                    var nearStreetViewLocation = data.location.latLng;
+                    var heading = google.maps.geometry.spherical.computeHeading(
+                    nearStreetViewLocation, marker.position);
+                    infowindow.setContent('<div>' + marker.title + '</div><div id="pano"></div>');
+                    var panoramaOptions = {
+                        position: nearStreetViewLocation,
+                        pov: {
+                            heading: heading,
+                            pitch: 30
+                        }
+                    };
+                    var panorama = new google.maps.StreetViewPanorama(
+                    document.getElementById('pano'), panoramaOptions);
+                }
+                else
+                {
+                    infowindow.setContent('<div>' + marker.title + '</div>' +
+                    '<div>No Street View Found</div>');
+                }
+            }
+
+            // Use streetview service to get the closest streetview image within
+            // 50 meters of the markers position
+            streetViewService.getPanoramaByLocation(marker.position, radius, getStreetView);
+
+            //Show the info window on the map
+            infowindow.open(map, marker);
         }
     }
 

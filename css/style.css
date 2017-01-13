@@ -46,6 +46,15 @@ h1 {
     width: 340px;
 }
 
+#pano {
+    width: 200px;
+    height: 200px;
+}
+
+.text {
+    font-size: 12px;
+}
+
 #zoom-to-area-text {
     position: relative;
     width: 70%;
