@@ -8,7 +8,16 @@
         <link rel="stylesheet" href="css/style.css">
     </head>
     <body>
-        <div id="map"></div>
+        <div class="container">
+            <div class="options-box">
+                <h1>Find Your New NYC Home</h1>
+                <div>
+                    <input id="show-listings" type="button" value="Show Listings">
+                    <input id="hide-listings" type="button" value="Hide Listings">
+                </div>
+            </div>
+            <div id="map"></div>
+        </div>
         <script src="js/main.js"></script>
         <script async defer
             src="https://maps.googleapis.com/maps/api/js?key=AIzaSyCFSI0h802PiADq5yBwq4MAY6tgeJPlEnU&v=3&callback=initMap">
