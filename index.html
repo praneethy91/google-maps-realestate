@@ -5,7 +5,7 @@
         <meta name="description" content="Using google maps to create a real estate application">
         <meta name="viewport" content="width=device-width, initial-scale=1">
         <title>Google Maps Real estate</title>
-        <link rel="stylesheet" href="css/style.css">
+        <link rel="stylesheet" href="dist/css/all.min.css">
     </head>
     <body>
         <div class="container">
@@ -23,7 +23,8 @@
             </div>
             <div id="map"></div>
         </div>
-        <script src="js/main.js"></script>
+        <script defer src="dist/js/dep.min.js"></script>
+        <script defer src="dist/js/my.min.js"></script>
         <script async defer
             src="https://maps.googleapis.com/maps/api/js?libraries=geometry,places&key=AIzaSyCFSI0h802PiADq5yBwq4MAY6tgeJPlEnU&v=3&callback=initMap">
         </script>

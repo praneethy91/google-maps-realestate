@@ -1,0 +1,22 @@
+{
+  "name": "neighbourhood-map",
+  "homepage": "https://github.com/praneethy91/neighbourhood-map",
+  "authors": [
+    "praneethy91 <praneethy91@gmail.com>"
+  ],
+  "description": "A map of nearby interesting places in neighbourhood which you provide",
+  "main": "",
+  "keywords": [
+    "maps",
+    "google",
+    "foursquare",
+    "neighbourhood",
+    "api",
+    "knockoutJS"
+  ],
+  "license": "MIT",
+  "dependencies": {
+    "jquery": "^3.1.1",
+    "knockout": "^3.4.1"
+  }
+}

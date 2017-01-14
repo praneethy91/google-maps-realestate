@@ -1,0 +1,35 @@
+{
+  "name": "neighbourhood-map",
+  "version": "1.0.0",
+  "description": "A neighbourhood map with interesting places around a neighbourhood which the user specifies",
+  "main": "index.js",
+  "scripts": {
+    "test": "echo \"Error: no test specified\" && exit 1"
+  },
+  "repository": {
+    "type": "git",
+    "url": "git+https://github.com/praneethy91/neighbourhood-map.git"
+  },
+  "keywords": [
+    "neighbourhood",
+    "map",
+    "google",
+    "knockoutJS",
+    "gruntJS",
+    "bower",
+    "foursquare",
+    "api"
+  ],
+  "author": "praneethy91",
+  "license": "MIT",
+  "bugs": {
+    "url": "https://github.com/praneethy91/neighbourhood-map/issues"
+  },
+  "homepage": "https://github.com/praneethy91/neighbourhood-map#readme",
+  "devDependencies": {
+    "grunt": "^1.0.1",
+    "grunt-contrib-cssmin": "^1.0.2",
+    "grunt-contrib-uglify": "^2.0.0",
+    "grunt-contrib-watch": "^1.0.0"
+  }
+}
