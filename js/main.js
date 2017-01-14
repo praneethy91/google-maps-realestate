@@ -118,10 +118,6 @@ function initMap() {
         mapTypeControl: false
     });
 
-    //This autocomplete is for use within the geocode input box
-    var zoomAutoComplete = new google.maps.places.Autocomplete(
-        document.getElementById('zoom-to-area-text'));
-
     // Create a searchbox in order to execute a places search
     var searchBox = new google.maps.places.SearchBox(
     document.getElementById('places-search'));
@@ -187,10 +183,6 @@ function initMap() {
 
         document.getElementById('show-listings').addEventListener('click', showListings);
         document.getElementById('hide-listings').addEventListener('click', hideMarkers(markers));
-
-        document.getElementById('zoom-to-area').addEventListener('click', function() {
-          zoomToArea();
-        });
 
         // Listen for the event fired when the user selects a prediction from the
         // picklist and retrieve more details for that place.
@@ -286,34 +278,34 @@ function initMap() {
         return markerImage;
     }
 
-    function zoomToArea() {
-        // Initialize the geocoder.
-        var geocoder = new google.maps.Geocoder();
-        // Get the address or place that the user entered.
-        var address = document.getElementById('zoom-to-area-text').value;
-        // Make sure the address isn't blank.
-        if (address == '') {
-            window.alert('You must enter an area, or address.');
-        }
-        else {
-          // Geocode the address/area entered to get the center. Then, center the map
-          // on it and zoom in
-            geocoder.geocode(
-                { address: address,
-                  componentRestrictions: {locality: 'New York'}
-                },
-                function(results, status) {
-                    if (status == google.maps.GeocoderStatus.OK) {
-                        map.setCenter(results[0].geometry.location);
-                        map.setZoom(15);
-                    }
-                    else {
-                        window.alert('We could not find that location - try entering a more' +
-                        ' specific place.');
-                    }
-            });
-        }
-    }
+    // function zoomToArea() {
+    //     // Initialize the geocoder.
+    //     var geocoder = new google.maps.Geocoder();
+    //     // Get the address or place that the user entered.
+    //     var address = document.getElementById('zoom-to-area-text').value;
+    //     // Make sure the address isn't blank.
+    //     if (address == '') {
+    //         window.alert('You must enter an area, or address.');
+    //     }
+    //     else {
+    //       // Geocode the address/area entered to get the center. Then, center the map
+    //       // on it and zoom in
+    //         geocoder.geocode(
+    //             { address: address,
+    //               componentRestrictions: {locality: 'New York'}
+    //             },
+    //             function(results, status) {
+    //                 if (status == google.maps.GeocoderStatus.OK) {
+    //                     map.setCenter(results[0].geometry.location);
+    //                     map.setZoom(15);
+    //                 }
+    //                 else {
+    //                     window.alert('We could not find that location - try entering a more' +
+    //                     ' specific place.');
+    //                 }
+    //         });
+    //     }
+    // }
 
     // This function fires when the user selects a searchbox picklist item.
     // It will do a nearby search using the selected query string or place.
