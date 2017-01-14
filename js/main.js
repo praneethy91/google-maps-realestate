@@ -118,6 +118,10 @@ function initMap() {
         mapTypeControl: false
     });
 
+    //This autocomplete is for use within the geocode input box
+    var zoomAutoComplete = new google.maps.places.Autocomplete(
+        document.getElementById('zoom-to-area-text'));
+
     var locations = [
         {title: 'Park Ave Penthouse', location: {lat: 40.7713024, lng: -73.9632393}},
         {title: 'Chelsea Loft', location: {lat: 40.7444883, lng: -73.9949465}},
@@ -158,6 +162,14 @@ function initMap() {
         // Create an onclick event to open an infowindow at each marker.
         marker.addListener('click', function() {
             populateInfoWindow(this, largeInfowindow);
+        });
+
+        /* This is for closing the info window when user clicks on any
+         * other area of the map or any other places of interest outside our markers
+         */
+        google.maps.event.addListener(map, "click", function(event) {
+            largeInfowindow.marker = null;
+            largeInfowindow.close();
         });
 
         // Two event listeners - one for mouseover, one for mouseout,
