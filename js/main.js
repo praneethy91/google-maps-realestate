@@ -119,8 +119,9 @@ function initMap() {
     });
 
     // Create a searchbox in order to execute a places search
-    var searchBox = new google.maps.places.SearchBox(
-    document.getElementById('places-search'));
+    var autocomplete = new google.maps.places.Autocomplete(
+        document.getElementById('neighbourhood-text'));
+    autocomplete.addListener('place_changed', goToPlace);
 
     var locations = [
         {title: 'Park Ave Penthouse', location: {lat: 40.7713024, lng: -73.9632393}},
@@ -183,16 +184,6 @@ function initMap() {
 
         document.getElementById('show-listings').addEventListener('click', showListings);
         document.getElementById('hide-listings').addEventListener('click', hideMarkers(markers));
-
-        // Listen for the event fired when the user selects a prediction from the
-        // picklist and retrieve more details for that place.
-        searchBox.addListener('places_changed', function() {
-          searchBoxPlaces(this);
-        });
-
-        // Listen for the event fired when the user selects a prediction and clicks
-        // "go" more details for that place.
-        document.getElementById('go-places').addEventListener('click', textSearchPlaces);
     }
 
     // This function populates the infowindow when the marker is clicked. We'll only allow
@@ -278,34 +269,45 @@ function initMap() {
         return markerImage;
     }
 
-    // function zoomToArea() {
-    //     // Initialize the geocoder.
-    //     var geocoder = new google.maps.Geocoder();
-    //     // Get the address or place that the user entered.
-    //     var address = document.getElementById('zoom-to-area-text').value;
-    //     // Make sure the address isn't blank.
-    //     if (address == '') {
-    //         window.alert('You must enter an area, or address.');
-    //     }
-    //     else {
-    //       // Geocode the address/area entered to get the center. Then, center the map
-    //       // on it and zoom in
-    //         geocoder.geocode(
-    //             { address: address,
-    //               componentRestrictions: {locality: 'New York'}
-    //             },
-    //             function(results, status) {
-    //                 if (status == google.maps.GeocoderStatus.OK) {
-    //                     map.setCenter(results[0].geometry.location);
-    //                     map.setZoom(15);
-    //                 }
-    //                 else {
-    //                     window.alert('We could not find that location - try entering a more' +
-    //                     ' specific place.');
-    //                 }
-    //         });
-    //     }
-    // }
+    function goToPlace() {
+        var place = autocomplete.getPlace();
+        if (!place.geometry) {
+
+            // User entered the name of a Place that was not suggested and
+            // pressed the Enter key. Use geocode to get the place as fallback.
+            var geocoder = new google.maps.Geocoder();
+
+            // Get the address or place that the user entered.
+            var address = document.getElementById('neighbourhood-text').value;
+            // Make sure the address isn't blank.
+            if (address == '') {
+                window.alert('You must enter an area, or address.');
+            }
+            else {
+                // Geocode the address/area entered to get the center. Then, center the map
+                // on it and zoom in
+                geocoder.geocode({
+                    address: address
+                },
+                function(results, status) {
+                    if (status == google.maps.GeocoderStatus.OK) {
+                        map.setCenter(results[0].geometry.location);
+                        map.setZoom(17);
+                    }
+                    else {
+                        window.alert("No details available for input: '" + place.name + "'");
+                    }
+                });
+            }
+        }
+        else if (place.geometry.viewport) {
+            map.fitBounds(place.geometry.viewport);
+        }
+        else {
+            map.setCenter(place.geometry.location);
+            map.setZoom(17);
+        }
+    }
 
     // This function fires when the user selects a searchbox picklist item.
     // It will do a nearby search using the selected query string or place.

@@ -55,11 +55,7 @@ h1 {
     font-size: 12px;
 }
 
-#zoom-to-area-text {
+#neighbourhood-text {
     position: relative;
-    width: 70%;
-}
-
-#zoom-to-area {
-    width: 24%;
+    width: 50%;
 }
