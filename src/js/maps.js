@@ -1,6 +1,5 @@
 var map;
 var markers = [];
-var placeMarkers = [];
 var styles =
 [
     {
@@ -106,6 +105,14 @@ var styles =
     }
 ];
 
+var PlaceInfo = function(lat, lng, title){
+    this.location = {
+        'lat': lat,
+        'lng': lng
+    };
+    this.title = title;
+};
+
 function initMap() {
     // Constructor creates a new map and binds it to the div in the page
     map = new google.maps.Map(document.getElementById('map'), {
@@ -118,21 +125,23 @@ function initMap() {
         mapTypeControl: false
     });
 
-    // Create a searchbox in order to execute a places search
+    // Create an autocomplete box to input location around which to show
     var autocomplete = new google.maps.places.Autocomplete(
         document.getElementById('neighbourhood-text'));
-    autocomplete.addListener('place_changed', goToPlace);
 
-    var locations = [
-        {title: 'Park Ave Penthouse', location: {lat: 40.7713024, lng: -73.9632393}},
-        {title: 'Chelsea Loft', location: {lat: 40.7444883, lng: -73.9949465}},
-        {title: 'Union Square Open Floor Plan', location: {lat: 40.7347062, lng: -73.9895759}},
-        {title: 'East Village Hip Studio', location: {lat: 40.7281777, lng: -73.984377}},
-        {title: 'TriBeCa Artsy Bachelor Pad', location: {lat: 40.7195264, lng: -74.0089934}},
-        {title: 'Chinatown Homey Space', location: {lat: 40.7180628, lng: -73.9961237}}
-    ];
+    // Add a listener when user selects or presses enter after inputting a place
+    autocomplete.addListener('place_changed', showPlaces);
 
+    // Have only one infoWindow show at a time
     var largeInfowindow = new google.maps.InfoWindow();
+
+    /* This is for closing the info window when user clicks on any
+     * other area of the map or any other places of interest outside our markers
+     */
+    google.maps.event.addListener(map, "click", function(event) {
+        largeInfowindow.marker = null;
+        largeInfowindow.close();
+    });
 
     // Style the markers a bit. This will be our listing marker icon.
     var defaultIcon = makeMarkerIcon('ffd105');
@@ -141,49 +150,49 @@ function initMap() {
     // mouses over the marker.
     var highlightedIcon = makeMarkerIcon('2ddb0f');
 
-    // The following group uses the location array to create an array of markers on initialize.
-    for (var i = 0; i < locations.length; i++) {
+    // Add event listeners to the show and hide listings buttons
+    document.getElementById('show-listings').addEventListener('click', showListings);
+    document.getElementById('hide-listings').addEventListener('click', hideMarkers(markers));
 
-        // Get the position from the location array.
-        var position = locations[i].location;
-        var title = locations[i].title;
+    function setMarkers(placeInfos) {
 
-        // Create a marker per location, and put into markers array.
-        var marker = new google.maps.Marker({
-            position: position,
-            title: title,
-            icon: defaultIcon,
-            animation: google.maps.Animation.DROP,
-            id: i
-        });
+        //Reinitialize the markers
+        markers = [];
+        // The following group uses the location array to create an array of markers on initialize.
+        for (var i = 0; i < placeInfos.length; i++) {
 
-        // Push the marker to our array of markers.
-        markers.push(marker);
+            // Get the position from the location array.
+            var position = placeInfos[i].location;
+            var title = placeInfos[i].title;
 
-        // Create an onclick event to open an infowindow at each marker.
-        marker.addListener('click', function() {
-            populateInfoWindow(this, largeInfowindow);
-        });
+            // Create a marker per location, and put into markers array.
+            var marker = new google.maps.Marker({
+                position: position,
+                title: title,
+                icon: defaultIcon,
+                animation: google.maps.Animation.DROP,
+                id: i
+            });
 
-        /* This is for closing the info window when user clicks on any
-         * other area of the map or any other places of interest outside our markers
-         */
-        google.maps.event.addListener(map, "click", function(event) {
-            largeInfowindow.marker = null;
-            largeInfowindow.close();
-        });
+            // Push the marker to our array of markers.
+            markers.push(marker);
 
-        // Two event listeners - one for mouseover, one for mouseout,
-        // to change the colors back and forth.
-        marker.addListener('mouseover', function() {
-            this.setIcon(highlightedIcon);
-        });
-        marker.addListener('mouseout', function() {
-            this.setIcon(defaultIcon);
-        });
+            // Create an onclick event to open an infowindow at each marker.
+            marker.addListener('click', function() {
+                populateInfoWindow(this, largeInfowindow);
+            });
 
-        document.getElementById('show-listings').addEventListener('click', showListings);
-        document.getElementById('hide-listings').addEventListener('click', hideMarkers(markers));
+            // Two event listeners - one for mouseover, one for mouseout,
+            // to change the colors back and forth.
+            marker.addListener('mouseover', function() {
+                this.setIcon(highlightedIcon);
+                populateInfoWindow(this, largeInfowindow);
+            });
+
+            marker.addListener('mouseout', function() {
+                this.setIcon(defaultIcon);
+            });
+        }
     }
 
     // This function populates the infowindow when the marker is clicked. We'll only allow
@@ -269,7 +278,7 @@ function initMap() {
         return markerImage;
     }
 
-    function goToPlace() {
+    function showPlaces() {
         var place = autocomplete.getPlace();
         if (!place.geometry) {
 
@@ -291,8 +300,14 @@ function initMap() {
                 },
                 function(results, status) {
                     if (status == google.maps.GeocoderStatus.OK) {
-                        map.setCenter(results[0].geometry.location);
-                        map.setZoom(17);
+                        if (results[0].geometry.viewport) {
+                            map.fitBounds(results[0].geometry.viewport);
+                        }
+                        else {
+                            map.setCenter(results[0].geometry.location);
+                            map.setZoom(17);
+                        }
+                        setFoursquareAreas(results[0].geometry.location);
                     }
                     else {
                         window.alert("No details available for input: '" + place.name + "'");
@@ -302,75 +317,29 @@ function initMap() {
         }
         else if (place.geometry.viewport) {
             map.fitBounds(place.geometry.viewport);
+            setFoursquareAreas(place.geometry.location);
         }
         else {
             map.setCenter(place.geometry.location);
             map.setZoom(17);
+            setFoursquareAreas(place.geometry.location);
         }
     }
 
-    // This function fires when the user selects a searchbox picklist item.
-    // It will do a nearby search using the selected query string or place.
-    function searchBoxPlaces(searchBox) {
-        hideMarkers(placeMarkers);
-        var places = searchBox.getPlaces();
-        // For each place, get the icon, name and location.
-        createMarkersForPlaces(places);
-        if (places.length == 0) {
-            window.alert('We did not find any places matching that search!');
-        }
-    }
-
-    // This function firest when the user select "go" on the places search.
-    // It will do a nearby search using the entered query string or place.
-    function textSearchPlaces() {
-        var bounds = map.getBounds();
-        hideMarkers(placeMarkers);
-        var placesService = new google.maps.places.PlacesService(map);
-        placesService.textSearch({
-            query: document.getElementById('places-search').value,
-            bounds: bounds
-        },
-        function(results, status) {
-            if (status === google.maps.places.PlacesServiceStatus.OK) {
-                createMarkersForPlaces(results);
-            }
-        });
-    }
-
-    // This function creates markers for each place found in either places search.
-    function createMarkersForPlaces(places) {
-        var bounds = new google.maps.LatLngBounds();
-        for (var i = 0; i < places.length; i++) {
-            var place = places[i];
-            var icon = {
-                url: place.icon,
-                size: new google.maps.Size(35, 35),
-                origin: new google.maps.Point(0, 0),
-                anchor: new google.maps.Point(15, 34),
-                scaledSize: new google.maps.Size(25, 25)
-            };
-
-            // Create a marker for each place.
-            var marker = new google.maps.Marker({
-                map: map,
-                icon: icon,
-                title: place.name,
-                position: place.geometry.location,
-                id: place.id
+    function setFoursquareAreas(location) {
+        var places = [];
+        $.getJSON('https://api.foursquare.com/v2/venues/search?ll='
+            + location.lat() +',' + location.lng() +
+            '&client_id=NEDAS2IC3HZXTZ0TZUGPPGKMYV3PZBVKS3ORT1VIX10GQRZY&client_secret=0QOLLTJMI5XODZXB5MQFCGCXJDAUXCMQSGAA4I1K0FGMEHT3&v=20170101',
+            function(data) {
+                $.each(data.response.venues, function(i, venue) {
+                places.push(new PlaceInfo(venue.location.lat, venue.location.lng, venue.name))
             });
 
-            placeMarkers.push(marker);
+            setMarkers(places);
+            showListings();
+        });
 
-            if (place.geometry.viewport) {
-                // Only geocodes have viewport.
-                bounds.union(place.geometry.viewport);
-            }
-            else {
-                bounds.extend(place.geometry.location);
-            }
-        }
-
-        map.fitBounds(bounds);
+        return places;
     }
 }
